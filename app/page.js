@@ -1,3 +1,5 @@
+'use client'; // Add this at the top to make this a client-side component
+
 import { useState } from 'react';
 import { PaperClipIcon, RefreshIcon } from '@heroicons/react/20/solid';
 
@@ -11,21 +13,24 @@ export default function Home() {
     setLoading(true);
     setError('');
     try {
-      const response = await fetch('/api/generate-image', {
+      // Make API request to Cloudflare AI model directly from the client
+      const response = await fetch('https://api.cloudflare.com/client/v4/accounts/YOUR_CLOUDFLARE_ACCOUNT_ID/ai/run/@cf/stabilityai/stable-diffusion-xl-base-1.0', {
         method: 'POST',
         headers: {
+          'Authorization': `Bearer YOUR_CLOUDFLARE_API_TOKEN`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ prompt }),
+        body: JSON.stringify({ prompt: prompt }),
       });
 
       const data = await response.json();
-      if (data.imageUrl) {
-        setImageUrl(data.imageUrl);
+      if (data.result) {
+        setImageUrl(data.result); // The result is the image URL
       } else {
         setError('Failed to generate image');
       }
     } catch (error) {
+      console.error('Error:', error);
       setError('Error generating image');
     } finally {
       setLoading(false);
